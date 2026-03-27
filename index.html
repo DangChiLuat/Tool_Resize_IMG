@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đổi Tên Ảnh</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f1117;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 32px 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 32px;
+    }
+
+    /* Drop Zone */
+    #dropZone {
+      border: 2px dashed #3a3f55;
+      border-radius: 16px;
+      padding: 48px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+      background: #161922;
+      max-width: 760px;
+      margin: 0 auto 24px;
+      position: relative;
+    }
+
+    #dropZone.drag-over {
+      border-color: #6c63ff;
+      background: #1e1f36;
+      box-shadow: 0 0 24px rgba(108, 99, 255, 0.25);
+    }
+
+    #dropZone svg {
+      width: 52px;
+      height: 52px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    #dropZone p {
+      font-size: 0.95rem;
+      color: #888;
+      line-height: 1.7;
+    }
+
+    #dropZone p span {
+      color: #6c63ff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    #fileInput { display: none; }
+
+    /* Rule hint */
+    .rule-hint {
+      max-width: 760px;
+      margin: 0 auto 20px;
+      background: #1a1d2e;
+      border-left: 3px solid #6c63ff;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.82rem;
+      color: #aaa;
+    }
+    .rule-hint strong { color: #c8c2ff; }
+
+    /* File table */
+    .table-wrapper {
+      max-width: 760px;
+      margin: 0 auto 24px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #2a2d3e;
+      display: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    thead tr {
+      background: #1e2133;
+    }
+
+    thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #aaa;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    tbody tr {
+      border-top: 1px solid #1e2133;
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover { background: #161924; }
+
+    tbody td {
+      padding: 11px 16px;
+      vertical-align: middle;
+    }
+
+    .thumb {
+      width: 44px;
+      height: 44px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #1a1d2e;
+    }
+
+    .name-original { color: #ccc; }
+    .name-new { color: #6fd98b; font-weight: 500; }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .status-pending  { background: #2a2d3e; color: #888; }
+    .status-renamed  { background: #1a3a28; color: #6fd98b; }
+    .status-resized  { background: #0d2a2a; color: #2dd4bf; }
+    .status-downloaded { background: #1a2a3a; color: #63b3ff; }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #555;
+      font-size: 1.1rem;
+      padding: 4px 6px;
+      border-radius: 4px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .remove-btn:hover { color: #ff5f70; background: #2a1a1e; }
+
+    /* Buttons bar */
+    .btn-bar {
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: filter 0.2s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .btn-primary   { background: #6c63ff; color: #fff; }
+    .btn-success   { background: #2ea04f; color: #fff; }
+    .btn-warning   { background: #d97706; color: #fff; }
+    .btn-info      { background: #0891b2; color: #fff; }
+    .btn-danger    { background: #c0392b; color: #fff; }
+    .btn:not(:disabled):hover { filter: brightness(1.15); }
+
+    .counter {
+      max-width: 760px;
+      margin: 12px auto 0;
+      font-size: 0.8rem;
+      color: #666;
+      text-align: right;
+    }
+
+    /* Resize panel */
+    .resize-panel {
+      max-width: 760px;
+      margin: 16px auto 0;
+      background: #161922;
+      border: 1px solid #2a2d3e;
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: none;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .resize-panel label {
+      font-size: 0.875rem;
+      color: #aaa;
+      white-space: nowrap;
+    }
+    .resize-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .resize-input-wrap input[type=number] {
+      width: 72px;
+      padding: 7px 10px;
+      background: #0f1117;
+      border: 1px solid #3a3f55;
+      border-radius: 7px;
+      color: #e0e0e0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .resize-input-wrap input[type=number]:focus { border-color: #6c63ff; }
+    .resize-input-wrap span { color: #888; font-size: 0.875rem; }
+    .resize-progress {
+      font-size: 0.8rem;
+      color: #888;
+      margin-left: auto;
+    }
+    .btn-teal { background: #0d9488; color: #fff; }
+
+    /* Empty state inside table */
+    .empty-row td {
+      text-align: center;
+      color: #555;
+      padding: 28px;
+      font-size: 0.85rem;
+    }
+
+    /* Compress panel */
+    .compress-panel {
+      max-width: 760px;
+      margin: 12px auto 0;
+      background: #161922;
+      border: 1px solid #2a2d3e;
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: none;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .compress-panel label { font-size: 0.875rem; color: #aaa; white-space: nowrap; }
+    .compress-input-wrap { display: flex; align-items: center; gap: 8px; }
+    .compress-input-wrap input[type=range] { width: 120px; accent-color: #7c3aed; cursor: pointer; }
+    .compress-quality-val { color: #c084fc; font-weight: 700; min-width: 38px; font-size: 0.9rem; }
+    .compress-progress { font-size: 0.8rem; color: #888; margin-left: auto; }
+    .btn-violet { background: #7c3aed; color: #fff; }
+    .status-compressed { background: #2d1a4a; color: #c084fc; }
+    .size-orig { color: #aaa; font-size: 0.82rem; }
+    .size-savings { color: #4ade80; font-weight: 600; font-size: 0.78rem; }
+
+    /* Copyright footer */
+    .footer-copyright {
+      text-align: center;
+      margin-top: 48px;
+      padding: 16px 20px;
+      border-top: 1px solid #1e2133;
+      font-size: 0.8rem;
+      color: #555;
+      letter-spacing: 0.4px;
+    }
+    .footer-copyright span {
+      color: #6c63ff;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🖼 CHỈNH SỬA HÌNH ẢNH</h1>
+  <p class="subtitle">Kéo thả ảnh vào vùng bên dưới, xem trước tên mới và tải xuống</p>
+
+  <!-- Drop Zone -->
+  <div id="dropZone">
+    <input type="file" id="fileInput" multiple accept="image/*" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+    </svg>
+    <p>Kéo &amp; thả ảnh vào đây<br/>hoặc <span id="browseBtn">chọn file từ máy tính</span></p>
+  </div>
+
+  <!-- Rule hint -->
+  <div class="rule-hint">
+    <strong>Quy tắc đổi tên:</strong> Viết hoa chữ cái đầu mỗi từ, thay dấu cách bằng <code>_</code>
+    &nbsp;—&nbsp; Ví dụ: <strong>fish 2.jpg</strong> → <strong>Fish_2.jpg</strong>
+    &nbsp;|&nbsp; <strong>my photo abc.png</strong> → <strong>My_Photo_Abc.png</strong>
+  </div>
+
+  <!-- File table -->
+  <div class="table-wrapper" id="tableWrapper">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:56px">Ảnh</th>
+          <th>Tên gốc</th>
+          <th>Tên mới</th>
+          <th style="width:130px">Kích thước</th>
+          <th style="width:110px">Trạng thái</th>
+          <th style="width:44px"></th>
+        </tr>
+      </thead>
+      <tbody id="fileList"></tbody>
+    </table>
+  </div>
+
+  <p class="counter" id="counter"></p>
+
+  <!-- Resize panel -->
+  <div class="resize-panel" id="resizePanel">
+    <label>Giảm kích thước còn:</label>
+    <div class="resize-input-wrap">
+      <input type="number" id="resizePercent" min="1" max="99" value="50" />
+      <span>%</span>
+    </div>
+    <button class="btn btn-teal" id="btnResize">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21H3M21 3v18M3 3h18"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 21V9h12"/>
+      </svg>
+      Giảm kích thước
+    </button>
+    <span class="resize-progress" id="resizeProgress"></span>
+  </div>
+
+  <!-- Compress panel -->
+  <div class="compress-panel" id="compressPanel">
+    <label>Chất lượng nén:</label>
+    <div class="compress-input-wrap">
+      <input type="range" id="compressQuality" min="10" max="95" value="75" />
+      <span class="compress-quality-val" id="compressQualityVal">75%</span>
+    </div>
+    <button class="btn btn-violet" id="btnCompress">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12l4 4 4-4"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v13"/>
+      </svg>
+      Nén ảnh
+    </button>
+    <span class="compress-progress" id="compressProgress"></span>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="btn-bar" id="btnBar">
+    <button class="btn btn-primary" id="btnPreview" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      Xem trước đổi tên
+    </button>
+
+    <button class="btn btn-success" id="btnDownload" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+      </svg>
+      Tải xuống tất cả
+    </button>
+
+    <button class="btn btn-warning" id="btnDownloadZip" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16 3H8l-2 4h12l-2-4z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 12v4m0 0l-2-2m2 2l2-2"/>
+      </svg>
+      Tải xuống ZIP
+    </button>
+
+    <button class="btn btn-info" id="btnExportEnum" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+      </svg>
+      Xuất Enum (.ts)
+    </button>
+
+    <button class="btn btn-danger" id="btnClear" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+      </svg>
+      Xóa tất cả
+    </button>
+  </div>
+
+  <script>
+    const dropZone   = document.getElementById('dropZone');
+    const fileInput  = document.getElementById('fileInput');
+    const browseBtn  = document.getElementById('browseBtn');
+    const fileList   = document.getElementById('fileList');
+    const tableWrapper = document.getElementById('tableWrapper');
+    const counter    = document.getElementById('counter');
+    const btnPreview     = document.getElementById('btnPreview');
+    const btnDownload    = document.getElementById('btnDownload');
+    const btnDownloadZip = document.getElementById('btnDownloadZip');
+    const btnExportEnum  = document.getElementById('btnExportEnum');
+    const btnResize      = document.getElementById('btnResize');
+    const resizePanel    = document.getElementById('resizePanel');
+    const resizePercent  = document.getElementById('resizePercent');
+    const resizeProgress = document.getElementById('resizeProgress');
+    const btnClear         = document.getElementById('btnClear');
+    const btnCompress       = document.getElementById('btnCompress');
+    const compressPanel     = document.getElementById('compressPanel');
+    const compressQuality   = document.getElementById('compressQuality');
+    const compressQualityVal = document.getElementById('compressQualityVal');
+    const compressProgress  = document.getElementById('compressProgress');
+
+    // Each entry: { file, newName, status: 'pending'|'renamed' }
+    let entries = [];
+
+    /* ── Name transform ─────────────────────────────────────── */
+    function transformName(filename) {
+      const lastDot = filename.lastIndexOf('.');
+      const hasExt  = lastDot > 0;
+      const base = hasExt ? filename.slice(0, lastDot) : filename;
+      const ext  = hasExt ? filename.slice(lastDot)    : '';
+
+      const newBase = base
+        .split(/[\s_]+/)          // split on spaces or underscores
+        .filter(Boolean)
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+        .join('_');
+
+      return newBase + ext;
+    }
+
+    /* ── Helpers ────────────────────────────────────────────── */
+    function updateUI() {
+      const has = entries.length > 0;
+      tableWrapper.style.display = has ? 'block' : 'none';
+      resizePanel.style.display   = has ? 'flex' : 'none';
+      compressPanel.style.display  = has ? 'flex' : 'none';
+      const hasRenamed = !entries.every(e => e.status !== 'renamed' && e.status !== 'downloaded' && e.status !== 'resized' && e.status !== 'compressed');
+      btnPreview.disabled     = !has;
+      btnDownload.disabled    = !has || !hasRenamed;
+      btnDownloadZip.disabled = !has || !hasRenamed;
+      btnExportEnum.disabled  = !has || !hasRenamed;
+      btnClear.disabled       = !has;
+      counter.textContent  = has ? `${entries.length} ảnh` : '';
+    }
+
+    function renderRows() {
+      fileList.innerHTML = '';
+      if (entries.length === 0) {
+        fileList.innerHTML = '<tr class="empty-row"><td colspan="6">Chưa có ảnh nào</td></tr>';
+        return;
+      }
+      entries.forEach((entry, idx) => {
+        const tr = document.createElement('tr');
+
+        const objectURL = URL.createObjectURL(entry.file);
+
+        const statusMap = {
+          pending:    '<span class="status-badge status-pending">Chờ xử lý</span>',
+          renamed:    '<span class="status-badge status-renamed">Đã đổi tên</span>',
+          resized:    '<span class="status-badge status-resized">Đã giảm KT</span>',
+          downloaded: '<span class="status-badge status-downloaded">Đã tải</span>',
+          compressed: '<span class="status-badge status-compressed">Đã nén</span>',
+        };
+
+        const sizeCell = entry.compressedSize !== null
+          ? `<span class="size-orig">${formatSize(entry.origSize)} →</span><br><span class="size-savings">${formatSize(entry.compressedSize)} (-${Math.round((1 - entry.compressedSize / entry.origSize) * 100)}%)</span>`
+          : `<span class="size-orig">${formatSize(entry.origSize)}</span>`;
+
+        tr.innerHTML = `
+          <td><img class="thumb" src="${objectURL}" alt="" /></td>
+          <td class="name-original">${escHtml(entry.file.name)}</td>
+          <td class="name-new">${escHtml(entry.newName || '—')}</td>
+          <td>${sizeCell}</td>
+          <td>${statusMap[entry.status]}</td>
+          <td><button class="remove-btn" title="Xóa" data-idx="${idx}">✕</button></td>
+        `;
+        fileList.appendChild(tr);
+      });
+
+      // Remove individual row
+      fileList.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = parseInt(btn.dataset.idx, 10);
+          entries.splice(i, 1);
+          renderRows();
+          updateUI();
+        });
+      });
+    }
+
+    function escHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function addFiles(fileArr) {
+      const existing = new Set(entries.map(e => e.file.name + e.file.size));
+      let added = 0;
+      fileArr.forEach(f => {
+        if (!f.type.startsWith('image/')) return;
+        const key = f.name + f.size;
+        if (existing.has(key)) return; // skip duplicates
+        existing.add(key);
+        entries.push({ file: f, newName: '', status: 'pending', origSize: f.size, compressedSize: null });
+        added++;
+      });
+      if (added > 0) {
+        renderRows();
+        updateUI();
+      }
+    }
+
+    /* ── Drag & Drop ────────────────────────────────────────── */
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      addFiles([...e.dataTransfer.files]);
+    });
+
+    browseBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      addFiles([...fileInput.files]);
+      fileInput.value = '';
+    });
+
+    /* ── Preview rename ─────────────────────────────────────── */
+    btnPreview.addEventListener('click', () => {
+      entries.forEach(entry => {
+        entry.newName = transformName(entry.file.name);
+        if (entry.status === 'pending') entry.status = 'renamed';
+      });
+      renderRows();
+      updateUI();
+    });
+
+    /* ── Download all ───────────────────────────────────────── */
+    btnDownload.addEventListener('click', async () => {
+      const toDownload = entries.filter(e => e.status === 'renamed' || e.status === 'resized' || e.status === 'downloaded' || e.status === 'compressed');
+      if (toDownload.length === 0) return;
+
+      btnDownload.disabled = true;
+      btnDownload.textContent = 'Đang tải...';
+
+      for (let i = 0; i < toDownload.length; i++) {
+        const entry = toDownload[i];
+        await downloadEntry(entry);
+        entry.status = 'downloaded';
+        // small delay so browser does not block multiple downloads
+        await new Promise(r => setTimeout(r, 120));
+      }
+
+      renderRows();
+      updateUI();
+      btnDownload.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        Tải xuống tất cả`;
+      btnDownload.disabled = false;
+    });
+
+    function downloadEntry(entry) {
+      return new Promise(resolve => {
+        const url = URL.createObjectURL(entry.file);
+        const a   = document.createElement('a');
+        a.href     = url;
+        a.download = entry.newName || transformName(entry.file.name);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => { URL.revokeObjectURL(url); resolve(); }, 80);
+      });
+    }
+
+    /* ── Download ZIP ─────────────────────────────────────── */
+    btnDownloadZip.addEventListener('click', async () => {
+      const toZip = entries.filter(e => e.status === 'renamed' || e.status === 'resized' || e.status === 'downloaded' || e.status === 'compressed');
+      if (toZip.length === 0) return;
+
+      btnDownloadZip.disabled = true;
+      btnDownloadZip.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+        </svg>
+        Đang nén...`;
+
+      const zip = new JSZip();
+      for (const entry of toZip) {
+        const name = entry.newName || transformName(entry.file.name);
+        const arrayBuffer = await entry.file.arrayBuffer();
+        zip.file(name, arrayBuffer);
+      }
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'images_renamed.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      btnDownloadZip.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16 3H8l-2 4h12l-2-4z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 12v4m0 0l-2-2m2 2l2-2"/>
+        </svg>
+        Tải xuống ZIP`;
+      btnDownloadZip.disabled = false;
+    });
+
+    /* ── Resize images ──────────────────────────────────────── */
+    function resizeImageFile(file, percent) {
+      return new Promise(resolve => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          const scale = percent / 100;
+          const w = Math.max(1, Math.round(img.naturalWidth  * scale));
+          const h = Math.max(1, Math.round(img.naturalHeight * scale));
+          const canvas = document.createElement('canvas');
+          canvas.width  = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(url);
+          const mimeType = file.type || 'image/jpeg';
+          const quality  = mimeType === 'image/png' ? undefined : 0.88;
+          canvas.toBlob(blob => {
+            resolve(new File([blob], file.name, { type: mimeType }));
+          }, mimeType, quality);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+        img.src = url;
+      });
+    }
+
+    btnResize.addEventListener('click', async () => {
+      const pct = parseInt(resizePercent.value, 10);
+      if (isNaN(pct) || pct < 1 || pct > 99) {
+        resizeProgress.textContent = '⚠ Nhập % từ 1 đến 99';
+        return;
+      }
+      if (entries.length === 0) return;
+
+      btnResize.disabled = true;
+      const total = entries.length;
+      for (let i = 0; i < total; i++) {
+        resizeProgress.textContent = `Đang xử lý ${i + 1}/${total}...`;
+        const entry = entries[i];
+        entry.file = await resizeImageFile(entry.file, pct);
+        // apply rename on top of resize if not yet renamed
+        if (!entry.newName) entry.newName = transformName(entry.file.name);
+        entry.status = 'resized';
+      }
+      resizeProgress.textContent = `✓ Đã giảm ${total} ảnh xuống ${pct}%`;
+      btnResize.disabled = false;
+      renderRows();
+      updateUI();
+    });
+
+    /* ── Export Enum ──────────────────────────────────────── */
+    btnExportEnum.addEventListener('click', () => {
+      const items = entries.filter(e => e.status === 'renamed' || e.status === 'resized' || e.status === 'downloaded' || e.status === 'compressed');
+      if (items.length === 0) return;
+
+      const lines = ['export enum ItemType {', '    Empty = 0,'];
+      items.forEach(entry => {
+        const name = entry.newName || transformName(entry.file.name);
+        // strip extension
+        const lastDot = name.lastIndexOf('.');
+        const enumKey = lastDot > 0 ? name.slice(0, lastDot) : name;
+        lines.push(`    ${enumKey},`);
+      });
+      lines.push('}');
+
+      const content = lines.join('\n');
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'ItemType.ts';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+
+    /* ── Compress images (TinyPNG-style) ──────────────────────── */
+    compressQuality.addEventListener('input', () => {
+      compressQualityVal.textContent = compressQuality.value + '%';
+    });
+
+    async function compressImageFile(file, quality) {
+      const options = {
+        maxSizeMB: 100,
+        maxWidthOrHeight: 99999,
+        useWebWorker: true,
+        fileType: file.type,
+        initialQuality: quality / 100,
+        alwaysKeepResolution: true,
+      };
+      try {
+        const compressed = await imageCompression(file, options);
+        return new File([compressed], file.name, { type: compressed.type || file.type });
+      } catch {
+        return file;
+      }
+    }
+
+    btnCompress.addEventListener('click', async () => {
+      const quality = parseInt(compressQuality.value, 10);
+      if (entries.length === 0) return;
+      btnCompress.disabled = true;
+      const total = entries.length;
+      let savedTotal = 0;
+      let origTotal = 0;
+      for (let i = 0; i < total; i++) {
+        compressProgress.textContent = `Đang nén ${i + 1}/${total}...`;
+        const entry = entries[i];
+        const origFileSize = entry.file.size;
+        const compressed = await compressImageFile(entry.file, quality);
+        entry.origSize = origFileSize;
+        entry.compressedSize = compressed.size;
+        entry.file = compressed;
+        if (!entry.newName) entry.newName = transformName(entry.file.name);
+        entry.status = 'compressed';
+        origTotal += origFileSize;
+        savedTotal += origFileSize - compressed.size;
+      }
+      const savedPct = origTotal > 0 ? Math.round(savedTotal / origTotal * 100) : 0;
+      compressProgress.textContent = `✓ Đã nén ${total} ảnh — tiết kiệm ${savedPct}% (${formatSize(savedTotal)})`;
+      btnCompress.disabled = false;
+      renderRows();
+      updateUI();
+    });
+
+    /* ── Clear all ──────────────────────────────────────────── */
+    btnClear.addEventListener('click', () => {
+      entries = [];
+      renderRows();
+      updateUI();
+    });
+  </script>
+
+  <footer class="footer-copyright">
+    &copy; 2026 Copyright by <span>DANGCHILUAT</span>
+  </footer>
+</body>
+</html>
