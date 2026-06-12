@@ -441,8 +441,11 @@
     function transformName(filename) {
       const lastDot = filename.lastIndexOf('.');
       const hasExt  = lastDot > 0;
-      const base = hasExt ? filename.slice(0, lastDot) : filename;
+      let base = hasExt ? filename.slice(0, lastDot) : filename;
       const ext  = hasExt ? filename.slice(lastDot)    : '';
+
+      // Replace hyphens with underscores, then remove leading digits+_ or just _
+      base = base.replace(/-/g, '_').replace(/^(\d+_|_)/, '');
 
       const newBase = base
         .split(/[\s_]+/)          // split on spaces or underscores
