@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,7 +8,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -72,7 +79,9 @@
       cursor: pointer;
     }
 
-    #fileInput { display: none; }
+    #fileInput {
+      display: none;
+    }
 
     /* Rule hint */
     .rule-hint {
@@ -85,7 +94,10 @@
       font-size: 0.82rem;
       color: #aaa;
     }
-    .rule-hint strong { color: #c8c2ff; }
+
+    .rule-hint strong {
+      color: #c8c2ff;
+    }
 
     /* File table */
     .table-wrapper {
@@ -122,7 +134,9 @@
       transition: background 0.15s;
     }
 
-    tbody tr:hover { background: #161924; }
+    tbody tr:hover {
+      background: #161924;
+    }
 
     tbody td {
       padding: 11px 16px;
@@ -137,8 +151,14 @@
       background: #1a1d2e;
     }
 
-    .name-original { color: #ccc; }
-    .name-new { color: #6fd98b; font-weight: 500; }
+    .name-original {
+      color: #ccc;
+    }
+
+    .name-new {
+      color: #6fd98b;
+      font-weight: 500;
+    }
 
     .status-badge {
       display: inline-block;
@@ -147,10 +167,26 @@
       font-size: 0.75rem;
       font-weight: 600;
     }
-    .status-pending  { background: #2a2d3e; color: #888; }
-    .status-renamed  { background: #1a3a28; color: #6fd98b; }
-    .status-resized  { background: #0d2a2a; color: #2dd4bf; }
-    .status-downloaded { background: #1a2a3a; color: #63b3ff; }
+
+    .status-pending {
+      background: #2a2d3e;
+      color: #888;
+    }
+
+    .status-renamed {
+      background: #1a3a28;
+      color: #6fd98b;
+    }
+
+    .status-resized {
+      background: #0d2a2a;
+      color: #2dd4bf;
+    }
+
+    .status-downloaded {
+      background: #1a2a3a;
+      color: #63b3ff;
+    }
 
     .remove-btn {
       background: none;
@@ -162,7 +198,11 @@
       border-radius: 4px;
       transition: color 0.15s, background 0.15s;
     }
-    .remove-btn:hover { color: #ff5f70; background: #2a1a1e; }
+
+    .remove-btn:hover {
+      color: #ff5f70;
+      background: #2a1a1e;
+    }
 
     /* Buttons bar */
     .btn-bar {
@@ -185,15 +225,44 @@
       gap: 7px;
       transition: filter 0.2s, transform 0.1s;
     }
-    .btn:active { transform: scale(0.97); }
-    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-    .btn-primary   { background: #6c63ff; color: #fff; }
-    .btn-success   { background: #2ea04f; color: #fff; }
-    .btn-warning   { background: #d97706; color: #fff; }
-    .btn-info      { background: #0891b2; color: #fff; }
-    .btn-danger    { background: #c0392b; color: #fff; }
-    .btn:not(:disabled):hover { filter: brightness(1.15); }
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: #6c63ff;
+      color: #fff;
+    }
+
+    .btn-success {
+      background: #2ea04f;
+      color: #fff;
+    }
+
+    .btn-warning {
+      background: #d97706;
+      color: #fff;
+    }
+
+    .btn-info {
+      background: #0891b2;
+      color: #fff;
+    }
+
+    .btn-danger {
+      background: #c0392b;
+      color: #fff;
+    }
+
+    .btn:not(:disabled):hover {
+      filter: brightness(1.15);
+    }
 
     .counter {
       max-width: 760px;
@@ -216,16 +285,19 @@
       gap: 14px;
       flex-wrap: wrap;
     }
+
     .resize-panel label {
       font-size: 0.875rem;
       color: #aaa;
       white-space: nowrap;
     }
+
     .resize-input-wrap {
       display: flex;
       align-items: center;
       gap: 6px;
     }
+
     .resize-input-wrap input[type=number] {
       width: 72px;
       padding: 7px 10px;
@@ -239,14 +311,26 @@
       outline: none;
       transition: border-color 0.2s;
     }
-    .resize-input-wrap input[type=number]:focus { border-color: #6c63ff; }
-    .resize-input-wrap span { color: #888; font-size: 0.875rem; }
+
+    .resize-input-wrap input[type=number]:focus {
+      border-color: #6c63ff;
+    }
+
+    .resize-input-wrap span {
+      color: #888;
+      font-size: 0.875rem;
+    }
+
     .resize-progress {
       font-size: 0.8rem;
       color: #888;
       margin-left: auto;
     }
-    .btn-teal { background: #0d9488; color: #fff; }
+
+    .btn-teal {
+      background: #0d9488;
+      color: #fff;
+    }
 
     /* Empty state inside table */
     .empty-row td {
@@ -269,15 +353,58 @@
       gap: 14px;
       flex-wrap: wrap;
     }
-    .compress-panel label { font-size: 0.875rem; color: #aaa; white-space: nowrap; }
-    .compress-input-wrap { display: flex; align-items: center; gap: 8px; }
-    .compress-input-wrap input[type=range] { width: 120px; accent-color: #7c3aed; cursor: pointer; }
-    .compress-quality-val { color: #c084fc; font-weight: 700; min-width: 38px; font-size: 0.9rem; }
-    .compress-progress { font-size: 0.8rem; color: #888; margin-left: auto; }
-    .btn-violet { background: #7c3aed; color: #fff; }
-    .status-compressed { background: #2d1a4a; color: #c084fc; }
-    .size-orig { color: #aaa; font-size: 0.82rem; }
-    .size-savings { color: #4ade80; font-weight: 600; font-size: 0.78rem; }
+
+    .compress-panel label {
+      font-size: 0.875rem;
+      color: #aaa;
+      white-space: nowrap;
+    }
+
+    .compress-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .compress-input-wrap input[type=range] {
+      width: 120px;
+      accent-color: #7c3aed;
+      cursor: pointer;
+    }
+
+    .compress-quality-val {
+      color: #c084fc;
+      font-weight: 700;
+      min-width: 38px;
+      font-size: 0.9rem;
+    }
+
+    .compress-progress {
+      font-size: 0.8rem;
+      color: #888;
+      margin-left: auto;
+    }
+
+    .btn-violet {
+      background: #7c3aed;
+      color: #fff;
+    }
+
+    .status-compressed {
+      background: #2d1a4a;
+      color: #c084fc;
+    }
+
+    .size-orig {
+      color: #aaa;
+      font-size: 0.82rem;
+    }
+
+    .size-savings {
+      color: #4ade80;
+      font-weight: 600;
+      font-size: 0.78rem;
+    }
 
     /* Copyright footer */
     .footer-copyright {
@@ -289,12 +416,14 @@
       color: #555;
       letter-spacing: 0.4px;
     }
+
     .footer-copyright span {
       color: #6c63ff;
       font-weight: 600;
     }
   </style>
 </head>
+
 <body>
 
   <h1>🖼 CHỈNH SỬA HÌNH ẢNH</h1>
@@ -305,17 +434,11 @@
     <input type="file" id="fileInput" multiple accept="image/*" />
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
       <path stroke-linecap="round" stroke-linejoin="round"
-        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
     </svg>
-    <p>Kéo &amp; thả ảnh vào đây<br/>hoặc <span id="browseBtn">chọn file từ máy tính</span></p>
+    <p>Kéo &amp; thả ảnh vào đây<br />hoặc <span id="browseBtn">chọn file từ máy tính</span></p>
   </div>
 
-  <!-- Rule hint -->
-  <div class="rule-hint">
-    <strong>Quy tắc đổi tên:</strong> Viết hoa chữ cái đầu mỗi từ, thay dấu cách bằng <code>_</code>
-    &nbsp;—&nbsp; Ví dụ: <strong>fish 2.jpg</strong> → <strong>Fish_2.jpg</strong>
-    &nbsp;|&nbsp; <strong>my photo abc.png</strong> → <strong>My_Photo_Abc.png</strong>
-  </div>
 
   <!-- File table -->
   <div class="table-wrapper" id="tableWrapper">
@@ -345,8 +468,8 @@
     </div>
     <button class="btn btn-teal" id="btnResize">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21H3M21 3v18M3 3h18"/>
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 21V9h12"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21H3M21 3v18M3 3h18" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 21V9h12" />
       </svg>
       Giảm kích thước
     </button>
@@ -362,9 +485,9 @@
     </div>
     <button class="btn btn-violet" id="btnCompress">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1"/>
-        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12l4 4 4-4"/>
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v13"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12l4 4 4-4" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v13" />
       </svg>
       Nén ảnh
     </button>
@@ -375,77 +498,97 @@
   <div class="btn-bar" id="btnBar">
     <button class="btn btn-primary" id="btnPreview" disabled>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-        <circle cx="12" cy="12" r="3"/>
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+        <circle cx="12" cy="12" r="3" />
       </svg>
       Xem trước đổi tên
     </button>
 
     <button class="btn btn-success" id="btnDownload" disabled>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
       </svg>
       Tải xuống tất cả
     </button>
 
     <button class="btn btn-warning" id="btnDownloadZip" disabled>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/>
-        <path stroke-linecap="round" stroke-linejoin="round" d="M16 3H8l-2 4h12l-2-4z"/>
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 12v4m0 0l-2-2m2 2l2-2"/>
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16 3H8l-2 4h12l-2-4z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 12v4m0 0l-2-2m2 2l2-2" />
       </svg>
       Tải xuống ZIP
     </button>
 
     <button class="btn btn-info" id="btnExportEnum" disabled>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
       </svg>
       Xuất Enum (.ts)
     </button>
 
     <button class="btn btn-danger" id="btnClear" disabled>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+        <polyline points="3 6 5 6 21 6" />
+        <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+        <path d="M10 11v6M14 11v6" />
+        <path d="M9 6V4h6v2" />
       </svg>
       Xóa tất cả
     </button>
   </div>
 
   <script>
-    const dropZone   = document.getElementById('dropZone');
-    const fileInput  = document.getElementById('fileInput');
-    const browseBtn  = document.getElementById('browseBtn');
-    const fileList   = document.getElementById('fileList');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const browseBtn = document.getElementById('browseBtn');
+    const fileList = document.getElementById('fileList');
     const tableWrapper = document.getElementById('tableWrapper');
-    const counter    = document.getElementById('counter');
-    const btnPreview     = document.getElementById('btnPreview');
-    const btnDownload    = document.getElementById('btnDownload');
+    const counter = document.getElementById('counter');
+    const btnPreview = document.getElementById('btnPreview');
+    const btnDownload = document.getElementById('btnDownload');
     const btnDownloadZip = document.getElementById('btnDownloadZip');
-    const btnExportEnum  = document.getElementById('btnExportEnum');
-    const btnResize      = document.getElementById('btnResize');
-    const resizePanel    = document.getElementById('resizePanel');
-    const resizePercent  = document.getElementById('resizePercent');
+    const btnExportEnum = document.getElementById('btnExportEnum');
+    const btnResize = document.getElementById('btnResize');
+    const resizePanel = document.getElementById('resizePanel');
+    const resizePercent = document.getElementById('resizePercent');
     const resizeProgress = document.getElementById('resizeProgress');
-    const btnClear         = document.getElementById('btnClear');
-    const btnCompress       = document.getElementById('btnCompress');
-    const compressPanel     = document.getElementById('compressPanel');
-    const compressQuality   = document.getElementById('compressQuality');
+    const btnClear = document.getElementById('btnClear');
+    const btnCompress = document.getElementById('btnCompress');
+    const compressPanel = document.getElementById('compressPanel');
+    const compressQuality = document.getElementById('compressQuality');
     const compressQualityVal = document.getElementById('compressQualityVal');
-    const compressProgress  = document.getElementById('compressProgress');
+    const compressProgress = document.getElementById('compressProgress');
 
     // Each entry: { file, newName, status: 'pending'|'renamed' }
     let entries = [];
 
+    /* ── Vietnamese tone removal ────────────────────────────── */
+    function removeVietnameseTones(str) {
+      return str
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')   // strip combining diacritical marks
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D');
+    }
+
     /* ── Name transform ─────────────────────────────────────── */
     function transformName(filename) {
       const lastDot = filename.lastIndexOf('.');
-      const hasExt  = lastDot > 0;
+      const hasExt = lastDot > 0;
       let base = hasExt ? filename.slice(0, lastDot) : filename;
-      const ext  = hasExt ? filename.slice(lastDot)    : '';
+      const ext = hasExt ? filename.slice(lastDot) : '';
+
+      // Remove Vietnamese diacritics
+      base = removeVietnameseTones(base);
 
       // Replace hyphens with underscores, then remove leading digits+_ or just _
       base = base.replace(/-/g, '_').replace(/^(\d+_|_)/, '');
+
+      // Remove special characters (keep letters, digits, spaces, underscores)
+      base = base.replace(/[^a-zA-Z0-9\s_]/g, '');
 
       const newBase = base
         .split(/[\s_]+/)          // split on spaces or underscores
@@ -460,15 +603,15 @@
     function updateUI() {
       const has = entries.length > 0;
       tableWrapper.style.display = has ? 'block' : 'none';
-      resizePanel.style.display   = has ? 'flex' : 'none';
-      compressPanel.style.display  = has ? 'flex' : 'none';
+      resizePanel.style.display = has ? 'flex' : 'none';
+      compressPanel.style.display = has ? 'flex' : 'none';
       const hasRenamed = !entries.every(e => e.status !== 'renamed' && e.status !== 'downloaded' && e.status !== 'resized' && e.status !== 'compressed');
-      btnPreview.disabled     = !has;
-      btnDownload.disabled    = !has || !hasRenamed;
+      btnPreview.disabled = !has;
+      btnDownload.disabled = !has || !hasRenamed;
       btnDownloadZip.disabled = !has || !hasRenamed;
-      btnExportEnum.disabled  = !has || !hasRenamed;
-      btnClear.disabled       = !has;
-      counter.textContent  = has ? `${entries.length} ảnh` : '';
+      btnExportEnum.disabled = !has || !hasRenamed;
+      btnClear.disabled = !has;
+      counter.textContent = has ? `${entries.length} ảnh` : '';
     }
 
     function renderRows() {
@@ -483,9 +626,9 @@
         const objectURL = URL.createObjectURL(entry.file);
 
         const statusMap = {
-          pending:    '<span class="status-badge status-pending">Chờ xử lý</span>',
-          renamed:    '<span class="status-badge status-renamed">Đã đổi tên</span>',
-          resized:    '<span class="status-badge status-resized">Đã giảm KT</span>',
+          pending: '<span class="status-badge status-pending">Chờ xử lý</span>',
+          renamed: '<span class="status-badge status-renamed">Đã đổi tên</span>',
+          resized: '<span class="status-badge status-resized">Đã giảm KT</span>',
           downloaded: '<span class="status-badge status-downloaded">Đã tải</span>',
           compressed: '<span class="status-badge status-compressed">Đã nén</span>',
         };
@@ -517,7 +660,7 @@
     }
 
     function escHtml(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     function formatSize(bytes) {
@@ -600,8 +743,8 @@
     function downloadEntry(entry) {
       return new Promise(resolve => {
         const url = URL.createObjectURL(entry.file);
-        const a   = document.createElement('a');
-        a.href     = url;
+        const a = document.createElement('a');
+        a.href = url;
         a.download = entry.newName || transformName(entry.file.name);
         document.body.appendChild(a);
         a.click();
@@ -630,9 +773,9 @@
       }
 
       const blob = await zip.generateAsync({ type: 'blob' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href     = url;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
       a.download = 'images_renamed.zip';
       document.body.appendChild(a);
       a.click();
@@ -656,15 +799,15 @@
         const url = URL.createObjectURL(file);
         img.onload = () => {
           const scale = percent / 100;
-          const w = Math.max(1, Math.round(img.naturalWidth  * scale));
+          const w = Math.max(1, Math.round(img.naturalWidth * scale));
           const h = Math.max(1, Math.round(img.naturalHeight * scale));
           const canvas = document.createElement('canvas');
-          canvas.width  = w;
+          canvas.width = w;
           canvas.height = h;
           canvas.getContext('2d').drawImage(img, 0, 0, w, h);
           URL.revokeObjectURL(url);
           const mimeType = file.type || 'image/jpeg';
-          const quality  = mimeType === 'image/png' ? undefined : 0.88;
+          const quality = mimeType === 'image/png' ? undefined : 0.88;
           canvas.toBlob(blob => {
             resolve(new File([blob], file.name, { type: mimeType }));
           }, mimeType, quality);
@@ -715,9 +858,9 @@
 
       const content = lines.join('\n');
       const blob = new Blob([content], { type: 'text/plain' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href     = url;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
       a.download = 'ItemType.ts';
       document.body.appendChild(a);
       a.click();
@@ -786,4 +929,5 @@
     &copy; 2026 Copyright by <span>DANGCHILUAT</span>
   </footer>
 </body>
+
 </html>
